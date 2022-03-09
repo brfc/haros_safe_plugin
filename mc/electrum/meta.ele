@@ -1,0 +1,40 @@
+abstract sig Node { 
+    subscribes, advertises: set Topic,
+    var inbox, outbox : set Message
+}
+
+abstract sig Topic {} 
+
+abstract sig Value {}
+abstract sig Field {}
+
+sig numeric extends Value {}
+sig string extends Value {}
+
+
+sig Message {
+    topic : one Topic,
+    value : Field -> lone Value
+}{
+	some value
+}
+
+fact Messages {
+	no (outbox + inbox)
+	all n : Node | always {
+		n.inbox.topic in n.subscribes
+		n.outbox.topic in n.advertises
+	}
+	all m : Message | always {
+		m in Node.outbox implies (all n : subscribes.(m.topic) | 
+			eventually (m in n.inbox))
+	}
+	always {
+		all m : Node.outbox | eventually m not in Node.outbox
+	}
+	all m : Message | always{
+		m in Node.inbox implies (some n : advertises.(m.topic) | 
+			before once (m in n.outbox))
+	}
+}
+

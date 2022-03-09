@@ -1,0 +1,140 @@
+%YAML 1.1
+---
+project: agrob
+packages:
+    - agrobv16_supervisor
+    - lms1xx
+    - joy
+    - teleop_twist_joy
+    - urg_node
+
+nodes:
+    lms1xx/LMS1xx_node:
+        rosname: lms1xx
+        advertise:
+            /scan: sensor_msgs/LaserScan
+        hpl:
+            properties:
+                - 'globally: no /scan {ranges[0] not in 0 to 100}'
+
+    joy/joy_node:
+        rosname: joy_teleop/joy_node
+        advertise:
+            /joy_teleop/joy: sensor_msgs/Joy
+        hpl:
+            properties:
+                - 'globally: no /joy_teleop/joy {button[0] not in [0,1]}' 
+                - 'globally: no /joy_teleop/joy {button[1] not in [0,1]}'
+                - 'globally: no /joy_teleop/joy {button[4] not in [0,1]}'
+                - 'globally: no /joy_teleop/joy {button[5] not in [0,1]}'
+
+
+    teleop_twist_joy/teleop_node:
+        rosname: joy_teleop/teleop_twist_joy
+        advertise:
+            /joy_teleop/cmd_vel: geometry_msgs/Twist
+        subscribe:
+            /joy_teleop/joy: sensor_msgs/Joy
+
+        hpl:
+            properties: 
+                - 'globally: no /joy_teleop/cmd_vel {linear.x not in 0 to 10}'
+                - 'globally: /joy_teleop/cmd_vel {linear.x in 0 to 10}
+                    requires /joy_teleop/joy {button[0] = 1,button[1] = 0, button[4] = 0, button[5] = 0}'
+
+    agrobv16_supervisor/agrobv16_supervisor_node:
+        rosname: agrobv16SUPERVISOR
+        subscribe:
+            /scan: sensor_msgs/LaserScan
+            /lidar1/scan: sensor_msgs/LaserScan
+            /joy_teleop/joy: sensor_msgs/Joy
+        advertise:
+            /agrobv16/current_state: std_msgs/Int16MultiArray
+            /supervisor/cmd_vel: geometry_msgs
+            /agrobv16/max_velocity: geometry_msgs
+        hpl:
+            properties:
+                - 'globally: no /agrobv16/current_state {data[0] not in [0,3,6]}'             
+                - 'globally: /agrobv16/current_state {data[0] = 6}
+                   requires /joy_teleop/joy {button[0] = 1}'                
+                - 'globally: /agrobv16/current_state {data[0] = 3}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1}'        
+                - 'globally: /agrobv16/current_state {data[0] = 0}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 0}'   
+                - 'globally: no /supervisor/cmd_vel {linear.x not in 0 to 10}'
+                - 'globally: /supervisor/cmd_vel {linear.x in 1 to 10 }
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1} || /joy_teleop/joy {button[4] = 1} || /joy_teleop/joy {button[5] = 1}' 
+                - 'globally: /supervisor/cmd_vel {linear.x in 0 to 10, linear.x not in 3.8 to 5.8, linear.x not in 4.2 to 6.2}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1}'
+                - 'globally: /supervisor/cmd_vel {linear.x in 3.8 to 4.2}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1} || /joy_teleop/joy {button[4] = 1, button[5] = 0}'
+                - 'globally: /supervisor/cmd_vel {linear.x in 5.8 to 6.2}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1} || /joy_teleop/joy {button[4] = 0, button[5] = 1}'
+                - 'globally: no /supervisor/cmd_vel {angular.x not in -100 to 100}'
+                - 'globally: /supervisor/cmd_vel {angular.x not in -100 to 100}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1} || /joy_teleop/joy {button[4] = 1, button[5] = 0} || /joy_teleop/joy {button[4] = 0, button[5] = 1}'
+                - 'globally: /supervisor/cmd_vel {angular.x in -8 to 12, angular.x not in -12 to 8}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1} || /joy_teleop/joy {button[4] = 1, button[5] = 0}'
+                - 'globally: /supervisor/cmd_vel {angular.x not in -8 to 12, angular.x in -12 to 8}
+                    requires /joy_teleop/joy {button[0] = 0, button[1] = 1} || /joy_teleop/joy {button[4] = 0, button[5] = 1}'
+                - 'globally: /agrobv16/max_velocity {linear.x = 0}
+                    requires /scan {ranges[0] in 0 to 4}'               
+                      
+               
+
+    agrobv16_supervisor/twist_mux:
+        rosname: Agrobv16_twist_mux
+        subscribe: 
+            /agrobv16/max_velocity: geometry_msgs/Twist
+            /supervisor/cmd_vel: geometry_msgs/Twist
+            /joy_teleop/cmd_vel: geometry_msgs/Twist
+        advertise:
+            /husky_velocity_controller/cmd_vel: geometry_msgs/Twist
+        hpl:
+            properties:
+                - 'globally: /husky_velocity_controller/cmd_vel {linear.x != 0}
+                    requires /agrobv16/max_velocity {linear.x != 0}'
+                - 'globally: /husky_velocity_controller/cmd_vel {linear.x = 0}
+                    requires /agrobv16/max_velocity {linear.x = 0} || /joy_teleop/cmd_vel {linear.x = 0}'
+                - 'globally: /agrobv16/max_velocity {linear.x = 0}
+                    causes /husky_velocity_controller/cmd_vel {linear.x = 0}'            
+                - 'globally : /husky_velocity_controller/cmd_vel {linear.x != 0} as V
+                    requires /supervisor/cmd_vel {linear.x = $V.linear.x, angular.x = $V.angular.x} || /joy_teleop/cmd_vel {linear.x = $V.linear.x,angular.x = $V.angular.x}'             
+                - 'globally : /supervisor/cmd_vel {linear.x in 0 to 10} as P
+                    causes /husky_velocity_controller/cmd_vel {linear.x = $P.linear.x, angular.x = $P.angular.x}'
+          
+
+configurations:
+    startup:
+        launch:
+            - agrobv16_supervisor/launch/startup.launch
+        hints:
+            /agrobv16SUPERVISOR:
+                subscribe:
+                    /scan: sensor_msgs/LaserScan
+                    /lidar1/scan: sensor_msgs/LaserScan
+                    /joy_teleop/joy: sensor_msgs/Joy
+                advertise:
+                    /agrobv16/max_velocity: geometry_msgs/Twist
+                    /supervisor/cmd_vel: geometry_msgs/Twist
+                    /agrobv16/current_state: std_msgs/Int16MultiArray 
+            /supervisorGUI1:
+                subscribe:
+                    /agrobv16/current_state: std_msgs/Int16MultiArray
+            /Agrobv16_twist_mux:
+                subscribe:
+                    /agrobv16/max_velocity: geometry_msgs/Twist
+                    /supervisor/cmd_vel: geometry_msgs/Twist
+                    /joy_teleop/cmd_vel: geometry_msgs/Twist
+                advertise:
+                    /husky_velocity_controller/cmd_vel: geometry_msgs/Twist
+        hpl:
+            properties:
+                - 'globally: /husky_velocity_controller/cmd_vel {linear.x = 0, angular.x != 0}
+                    requires /scan {ranges[0] in 0 to 4} || /joy_teleop/joy {button[0] = 1}'
+                - 'globally: /husky_velocity_controller/cmd_vel {linear.x in 1 to 10}
+                    requires /joy_teleop/joy {button[0] = 1} || /joy_teleop/joy {button[1] = 1}'
+                - 'globally: /agrobv16/current_state {data[0] = 3} requires /joy_teleop/joy {button[0] = 0, button[1] = 1}'
+                - 'globally: /agrobv16/current_state {data[0] = 6} requires /joy_teleop/joy {button[0] = 1}'
+                - 'globally: /agrobv16/current_state {data[0] = 0} requires /joy_teleop/joy {button[1] = 0, button[0] = 0}'
+                

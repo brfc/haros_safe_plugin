@@ -1,0 +1,25 @@
+%YAML 1.1
+---
+name: haros_plugin_mc
+version: 0.1
+rules:
+    mc:
+        name:           Architectural Properties
+        scope:          file
+        description:    Error reported by haros_plugin_mc.
+        tags:
+            - Model-Check
+            - Architecture
+            - Hpl-Properties
+
+supported_rules:
+    - mi_below_20
+    - mi_below_65
+supported_metrics:
+    - maintainability_index
+
+scope:
+    Time: 10
+    Message: 9
+    Value: 4
+
