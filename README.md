@@ -53,7 +53,7 @@ cd ~/haros_mc_plugin/plugin.yaml
 The HAROS specification must be placed in the `yaml` project file. The `~/haros_plugin_mc/mc/sample/sample.yaml`
 illustrates how the specification must be written.
 
-Afterthat, just run it as any other HAROS plugin. The following command illustrates how the analysis of the `sample` is executed.
+Afterwards, just run it as any other HAROS plugin. The following command illustrates how the analysis of the `sample` is executed.
 
 ```bash
 haros full -p ~/haros_plugin_mc/mc/sample/sample.yaml
