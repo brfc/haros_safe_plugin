@@ -4,9 +4,9 @@ Model-Checking Plugin for HAROS
 
 -------------------------------
 
-This open-source plugin developement process, description, and validation was published at IROS2020, [here](http://ras.papercept.net/images/temp/IROS/files/1158.pdf).
+This work ideas, development, and validation were published at IROS2020, [here](http://ras.papercept.net/images/temp/IROS/files/1158.pdf).
 
-The system-wide Architecture of the HAROS safety plug-in for ROS
+The system-wide Architecture of the HAROS safety plug-in for ROS:
 
 
 ![imp](./img/imp.png)
@@ -16,8 +16,8 @@ The system-wide Architecture of the HAROS safety plug-in for ROS
 
 ### Requirements
 
-Before using the plugin, it's required to install [HAROS](https://github.com/git-afsantos/haros) and its plugins.
-Afterthat, just clone the repository and execute the following commands:
+Before using the plugin, it's required to install [HAROS](https://github.com/git-afsantos/haros) and its standard plugins.
+Afterwards, just clone the repository and execute the following commands:
 
 ```bash
 git clone https://github.com/brfc/haros_plugin_mc.git
@@ -41,17 +41,17 @@ The command above will create the cache folders and place the auxiliary artifact
 
 ### Usage
 
-The plugin requires a yaml configuration file. Here it is possible to define generic plugin configurations, 
-as well as the plugin required configurations, as the verification `scopes`. Otherwise, inocous default scopes will be used.
+The plugin requires a yaml configuration file. Here, it is possible to define generic plugin configurations, plugin required configurations, and the verification `scopes`. 
+Otherwise, inocous default scopes will be used.
 
-The repository includes a configuration file model:
+The repository includes a configuration sample, that can be used to guide your own:
 
 ```bash
 cd ~/haros_mc_plugin/plugin.yaml
 ```
 
-The HAROS specification must be placed in the `yaml` project file. The `~/haros_plugin_mc/mc/sample/sample.yaml`
-illustrates how the specification must be written.
+The HAROS specification must be placed in the `yaml` project file. 
+The `~/haros_plugin_mc/mc/sample/sample.yaml` illustrates how specifications can be written.
 
 Afterwards, just run it as any other HAROS plugin. The following command illustrates how the analysis of the `sample` is executed.
 
@@ -62,4 +62,4 @@ haros full -p ~/haros_plugin_mc/mc/sample/sample.yaml
 -------------------------------
 
 ### Acknowledgment
-this work was financed by the ERDF – European Regional Development Fund through the Operational Programme for Competitiveness and Internationalisation - COMPETE 2020 Programme and by National Funds through the Portuguese funding agency, FCT - Fundação para a Ciência e a Tecnologia
+This work was financed by the ERDF – European Regional Development Fund through the Operational Programme for Competitiveness and Internationalisation - COMPETE 2020 Programme and by National Funds through the Portuguese funding agency, FCT - Fundação para a Ciência e a Tecnologia
