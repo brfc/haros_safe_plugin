@@ -1,4 +1,4 @@
-# HAROS Model-Checking Plugin
+# SafePlug - HAROS Model-Checking Plugin
 
 Model-Checking Plugin for HAROS
 
