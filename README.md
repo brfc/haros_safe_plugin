@@ -1,4 +1,4 @@
-# Safer - HAROS Model-Checking Plugin
+# HAROS Model-Checking Plugin
 
 Model-Checking Plugin for HAROS
 
